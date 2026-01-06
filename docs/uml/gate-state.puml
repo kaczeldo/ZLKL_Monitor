@@ -1,0 +1,52 @@
+@startuml
+title Stavový diagram – Monitorování vrat (TOF)
+
+skinparam state {
+  BackgroundColor #EEF
+  BorderColor black
+  ArrowColor black
+}
+
+[*] --> ZAVRENO
+
+state ZAVRENO {
+  note right
+    aktualni_stav = Zavreno
+    cas_otevreni = null
+    otevreni_potvrzeno = false
+  end note
+}
+
+state OTEVRENO_NEKONFIRMOVANO {
+  note right
+    aktualni_stav = Otevreno
+    cas_otevreni = Date.now()
+    otevreni_potvrzeno = false
+  end note
+}
+
+state OTEVRENO_KONFIRMOVANO {
+  note right
+    aktualni_stav = Otevreno
+    otevreni_potvrzeno = true
+  end note
+}
+
+ZAVRENO --> OTEVRENO_NEKONFIRMOVANO : tof_event(open)
+
+ZAVRENO --> OTEVRENO_NEKONFIRMOVANO : glob_event(sync_open)
+
+OTEVRENO_NEKONFIRMOVANO --> OTEVRENO_KONFIRMOVANO
+: timer_10s [trvani >= threshold]
+/ send OPEN email
+
+OTEVRENO_NEKONFIRMOVANO --> ZAVRENO
+: tof_event(close)
+/ reset cas_otevreni
+
+OTEVRENO_KONFIRMOVANO --> ZAVRENO
+: tof_event(close)
+/ send CLOSE email
+/ set cas_zavreni
+
+@enduml

@@ -1,15 +1,18 @@
+import "dotenv/config";
+console.log("API URL: ", process.env.ZLKL_API_URL);
 import { EventEngine } from "./engines/eventEngine";
 import { ThresholdEngine } from "./engines/thresholdEngine";
 import { MqttService } from "./services/mqttService";
 import { ZlklApi } from "./services/zlklApi";
 import { SensorStore } from "./store/sensorStore";
+import { config } from "./config";
 
 async function start() {
-  const api = new ZlklApi({
-    baseUrl: "https://example.com/api",
-    apiName: "tof_node_api",
-    apiKey: "FAKE_KEY",
-  });
+  if (!process.env.ZLKL_API_URL) {
+    throw new Error("ZLKL_API_URL is not set");
+  }
+
+  const api = new ZlklApi(config.api);
 
   console.log("fetching sensors...");
   const data = await api.getSensors();
@@ -21,11 +24,7 @@ async function start() {
   const thresholdEngine = new ThresholdEngine();
   const eventEngine = new EventEngine(api);
   const mqttService = new MqttService(
-    {
-      url: "test",
-      username: "test",
-      password: "test",
-    },
+    config.mqtt,
     sensorStore,
     thresholdEngine,
     eventEngine
