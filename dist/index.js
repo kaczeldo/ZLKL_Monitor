@@ -1,31 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
-console.log("API URL: ", process.env.ZLKL_API_URL);
+const fakeZlklApi_1 = require("./data/fakeZlklApi");
 const eventEngine_1 = require("./engines/eventEngine");
-const thresholdEngine_1 = require("./engines/thresholdEngine");
-const mqttService_1 = require("./services/mqttService");
-const zlklApi_1 = require("./services/zlklApi");
+const fakeMqttService_1 = require("./services/fakeMqttService");
 const sensorStore_1 = require("./store/sensorStore");
-const config_1 = require("./config");
+const locStore_1 = require("./store/locStore");
 async function start() {
-    if (!process.env.ZLKL_API_URL) {
-        throw new Error("ZLKL_API_URL is not set");
-    }
-    const api = new zlklApi_1.ZlklApi(config_1.config.api);
+    const api = new fakeZlklApi_1.FakeZlklApi();
     console.log("fetching sensors...");
     const data = await api.getSensors();
-    console.log("Received ZLKL_API data:");
-    console.log(JSON.stringify(data, null, 2));
+    const locStore = new locStore_1.LocStore();
+    locStore.loadLocations(data.loc);
     const sensorStore = new sensorStore_1.SensorStore();
     // store loaded sensors.
-    sensorStore.loadSensors(data.sens);
-    const thresholdEngine = new thresholdEngine_1.ThresholdEngine();
+    sensorStore.loadSensors(data.sens, locStore);
     const eventEngine = new eventEngine_1.EventEngine(api);
-    const mqttService = new mqttService_1.MqttService(config_1.config.mqtt, sensorStore, thresholdEngine, eventEngine);
-    mqttService.subscribe("zlkl/devs/glob/#");
-    mqttService.subscribe("zlkl/devs/tof/#");
-    console.log("[INIT] Subscribed to MQTT topics.");
+    const fakeMqtt2 = new fakeMqttService_1.FakeMqttService("someString", "someId", sensorStore, eventEngine);
+    const fakeMqtt = new fakeMqttService_1.FakeMqttService("http://192.168.88.46:12345", "zlkl_test_gate", sensorStore, eventEngine);
+    fakeMqtt.start();
 }
 start().catch(err => {
     console.error("Fatal startup error:", err);

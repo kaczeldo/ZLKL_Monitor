@@ -1,14 +1,9 @@
-import { run } from "node:test";
-import { SensorRuntimeState } from "../models/sensorRuntime";
-import { ZlklSensor, ZlklThreshold } from "../models/zlklTypes";
-import { EventEngine } from "./eventEngine";
-
 export type ThresholdOperator = "<" | ">" | "=" | "<=" | ">=";
-
+/*
 export class ThresholdEngine {
   public processValue(
     sensor: ZlklSensor,
-    runtime: SensorRuntimeState,
+    runtime: DoorRuntimeState,
     newValue: number,
     eventEngine: EventEngine
   ) {
@@ -24,6 +19,7 @@ export class ThresholdEngine {
         //skip for now
         continue;
       }
+      /*
 
       const desiredState = this.getDesiredState(prah, newValue);
 
@@ -59,6 +55,7 @@ export class ThresholdEngine {
       }, prah.minDelaySec * 1000);
     }
   }
+  /*
 
   parseOperator(expr: string): ThresholdOperator {
     if (expr.startsWith("<=")) return "<=";
@@ -94,11 +91,12 @@ export class ThresholdEngine {
     }
 
     return false;
+    
   }
 
   finalizeThreshold(
     sensor: ZlklSensor,
-    runtime: SensorRuntimeState,
+    runtime: DoorRuntimeState,
     prah: ZlklThreshold,
     eventEngine: EventEngine
   ) {
@@ -146,3 +144,4 @@ export class ThresholdEngine {
     return this.evaluateThreshold(prah.prah, newVal) ? "open" : "closed";
   }
 }
+*/

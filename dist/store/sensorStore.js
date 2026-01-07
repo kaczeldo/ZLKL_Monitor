@@ -7,19 +7,25 @@ class SensorStore {
         this.byId = new Map();
         this.runtime = new Map();
     }
-    loadSensors(sens) {
+    loadSensors(sens, locs) {
         this.byKey.clear();
         this.byId.clear();
         this.runtime.clear();
         for (const s of sens) {
+            // find the loc of the sensor
+            const l = locs.getById(s.misto_id);
             const key = `${s.mqtt_id}::${s.adr}`;
             this.byKey.set(key, s);
             this.byId.set(s.id, s);
             this.runtime.set(s.id, {
-                id: s.id,
-                lastValue: null,
-                lastUpdate: null,
-                state: "unknown",
+                previous_state: null,
+                current_state: "closed",
+                open_timestamp: null,
+                close_timestamp: null,
+                open_confirmed: false,
+                last_email_timestamp: null,
+                // store the tof_prah_min
+                tof_prah_min: l?.tof_prah_min
             });
         }
     }
@@ -32,13 +38,15 @@ class SensorStore {
     getRuntimeState(sensorId) {
         return this.runtime.get(sensorId);
     }
-    updateSensorValue(sensorId, value) {
-        const rt = this.runtime.get(sensorId);
-        if (!rt)
-            return;
-        rt.lastValue = value;
-        rt.lastUpdate = Date.now();
+    /*
+    public updateSensorValue(sensorId: number, value: number) {
+      const rt = this.runtime.get(sensorId);
+      if (!rt) return;
+  
+      rt.lastValue = value;
+      rt.lastUpdate = Date.now();
     }
+      */
     getTofSensorByMqttId(mqttId) {
         for (const sensor of this.byId.values()) {
             if (sensor.mqtt_id === mqttId && sensor.adr.startsWith("tof")) {
@@ -46,6 +54,12 @@ class SensorStore {
             }
         }
         return undefined;
+    }
+    getAllRuntimeStates() {
+        return this.runtime.values();
+    }
+    getAllSensors() {
+        return this.byId.values();
     }
 }
 exports.SensorStore = SensorStore;
