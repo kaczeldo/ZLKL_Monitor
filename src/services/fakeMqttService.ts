@@ -16,6 +16,8 @@ export class FakeMqttService {
 
     start () {
         console.log("[FakeMQTT] Starting fake MQTT service");
+        const randomTime = Math.floor(Math.random() * (12000 - 4000)) + 4000;
+        const randomTimeGlob = Math.floor(Math.random() * (60000 - 30000)) + 30000;
 
         this.tofInterval = setInterval(async () => {
             try {
@@ -30,7 +32,7 @@ export class FakeMqttService {
             } catch(err) {
                 console.error("[FakeMQTT] TOF error", err);
             }
-        }, 3000);
+        }, randomTime);
 
         this.globInterval = setInterval(async () => {
             try {
@@ -46,7 +48,7 @@ export class FakeMqttService {
             } catch(err) {
                 console.error("[FakeMQTT] GLOB error", err);
             }
-        }, 10000);
+        }, randomTimeGlob);
     }
 
     stop() {

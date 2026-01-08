@@ -14,6 +14,7 @@ export class PeriodicCheckEngine {
         this.timer = setInterval(() => {
             this.run();
         }, 10_000);
+        console.log("[PERIODIC_CHECK] Started successfully");
     }
 
     stop() {
@@ -21,17 +22,10 @@ export class PeriodicCheckEngine {
             clearInterval(this.timer);
             this.timer = undefined;
         }
+        console.log("[PERIODIC_CHECK] Stopped successfully");
     }
 
     run() {
-        // todo
-        /**
-         * Each 10 seconds go through each sensor and check runtime state.
-         * We are looking for:
-         * 1/ opened doors which did not crossed the threshold -> do nothing
-         * 2/ opened doors which did crossed the threshold -> send email and change status
-         * 3/ closed doors which ???
-         */
         const sensors = this.store.getAllSensors();
         for (const s of sensors) {
             const rs = this.store.getRuntimeState(s.id);
@@ -45,12 +39,13 @@ export class PeriodicCheckEngine {
                 const th_in_ml = rs.tof_prah_min! * 60 * 1000;
                 if (rs.duration >= th_in_ml){
                     // sent out emails
+                    console.log(`[PERIODIC_CHECK] ${s.id}: Triggering event.`);
                     this.eventEngine.triggerOpenOrClose(s, rs.current_state);
                     // set open confirm
                     rs.open_confirmed = true;
                     rs.last_email_timestamp = Date.now();            
                 } else { // do nothing
-
+                    console.log(`[PERIODIC_CHECK] ${s.id}: Threshold not satisfied: druation = ${rs.duration}, threshold = ${th_in_ml}`);
                 }
             }else if (rs.current_state === "closed"){
                 // logic for closed

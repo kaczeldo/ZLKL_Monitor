@@ -3,18 +3,39 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.handleGlobMessage = handleGlobMessage;
 exports.handleTofEventMessage = handleTofEventMessage;
 function handleGlobMessage(msg, store, eventEngine) {
-    /*
+    console.log(`[GLOB] Received glob event.`);
     for (const s of msg.t) {
-      const currSensor = store.getByMqtt(msg.id, s.addr);
-      if (!currSensor) continue;
-      let sensorRuntime = store.getRuntimeState(currSensor.id);
-      if (!sensorRuntime) continue;
-      sensorRuntime.lastValue = s.val;
-      sensorRuntime.lastUpdate = Date.now();
-      console.log("Glob msg from MQTT correctly handled. Calling threshold engine.");
-      thresholdEngine.processValue(currSensor, sensorRuntime, s.val, eventEngine);
+        const currSensor = store.getByMqtt(msg.id, s.addr);
+        if (!currSensor)
+            continue;
+        const runtime = store.getRuntimeState(currSensor.id);
+        if (!runtime)
+            continue;
+        const globState = s.val === 1 ? "open" : "closed";
+        // checks - if state is same, ignore, if hysteresis running ignore
+        if (runtime.current_state === globState)
+            continue;
+        if (runtime.hysteresis_timer)
+            continue;
+        // state different, hysteresis not active
+        runtime.previous_state = runtime.current_state;
+        runtime.current_state = globState;
+        if (globState === "open") {
+            if (!runtime.open_timestamp) { // if there is no record of opening
+                runtime.open_timestamp = Date.now();
+                runtime.open_confirmed = false;
+            }
+        }
+        else {
+            if (runtime.open_confirmed) {
+                runtime.close_timestamp = Date.now();
+                console.log(`[GLOB] ${currSensor.id}: Closing event.`);
+                eventEngine.triggerOpenOrClose(currSensor, "closed");
+            }
+            runtime.open_timestamp = null;
+            runtime.open_confirmed = false;
+        }
     }
-      */ //TODO
 }
 function handleTofEventMessage(msg, store, eventEngine) {
     if (msg.from !== "tof")
@@ -26,24 +47,6 @@ function handleTofEventMessage(msg, store, eventEngine) {
     if (!sensorId) {
         return;
     }
-    /*
-    let runtime = store.getRuntimeState(sensorId);
-    if (!runtime) return;
-    runtime.lastUpdate = Date.now();
-    runtime.state = msg.tof_status === 1 ? "open" : "closed";
-    runtime.lastValue = msg.tof_status;
-    
-  
-    runtime.pendingStart = undefined;
-    runtime.pendingState = undefined;
-    if (runtime.pendingTimer) {
-      clearTimeout(runtime.pendingTimer);
-    }
-    runtime.pendingTimer = undefined;
-    console.log("Tof event msg from MQTT correctly handled. Calling event engine.");
-    // trigger event sending and emails
-    eventEngine.triggerOpenOrClose(tofSensor, runtime.state);
-    */
     let runtime = store.getRuntimeState(sensorId);
     if (!runtime)
         return;
@@ -53,15 +56,22 @@ function handleTofEventMessage(msg, store, eventEngine) {
     if (runtime.hysteresis_timer) {
         // reset hysteresis if it was already running.
         clearTimeout(runtime.hysteresis_timer);
+        runtime.hysteresis_timer = undefined;
     }
     // start hysteresis
     runtime.hysteresis_target_state = targetState;
     runtime.hysteresis_start = Date.now();
+    console.log(`[HYSTERESIS] ${sensorId}: ${runtime.previous_state} → ${runtime.current_state}`);
     runtime.hysteresis_timer = setTimeout(() => {
-        finalizeHysteresis(runtime);
+        finalizeHysteresis(store, sensorId, eventEngine);
     }, 3000);
 }
-function finalizeHysteresis(runtime) {
+function finalizeHysteresis(store, sensorId, eventEngine) {
+    const runtime = store.getRuntimeState(sensorId);
+    if (!runtime)
+        return;
+    if (!runtime.hysteresis_target_state)
+        return;
     const newState = runtime.hysteresis_target_state;
     const now = Date.now();
     runtime.previous_state = runtime.current_state;
@@ -82,7 +92,15 @@ function finalizeHysteresis(runtime) {
         }
         else { // email was sent
             runtime.close_timestamp = now;
+            // trigger event
+            const sensor = store.getById(sensorId);
+            if (!sensor)
+                return;
+            eventEngine.triggerOpenOrClose(sensor, newState);
+            runtime.open_confirmed = false;
+            runtime.last_email_timestamp = null;
+            runtime.duration = undefined;
         }
     }
-    console.log(`[HYSTERESIS] State confirmed -> ${runtime.current_state}`);
+    console.log(`[HYSTERESIS] ${sensorId}: State confirmed -> ${runtime.current_state}`);
 }

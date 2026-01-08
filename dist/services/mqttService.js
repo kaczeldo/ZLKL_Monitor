@@ -7,10 +7,9 @@ exports.MqttService = void 0;
 const mqtt_1 = __importDefault(require("mqtt"));
 const mqttHandlers_1 = require("../mqtt/mqttHandlers");
 class MqttService {
-    constructor(config, store, thEngine, evEngine) {
+    constructor(config, store, evEngine) {
         this.config = config;
         this.store = store;
-        this.thEngine = thEngine;
         this.evEngine = evEngine;
         this.client = mqtt_1.default.connect(this.config.url, {
             username: this.config.username,
@@ -37,7 +36,7 @@ class MqttService {
             if (topic.startsWith("zlkl/devs/glob/")) {
                 const message = json;
                 console.log("Received MQTT Glob message.");
-                (0, mqttHandlers_1.handleGlobMessage)(message, this.store, this.thEngine, this.evEngine);
+                (0, mqttHandlers_1.handleGlobMessage)(message, this.store, this.evEngine);
                 return;
             }
             if (topic.startsWith("zlkl/devs/tof/")) {

@@ -6,7 +6,6 @@ class EventEngine {
         this.api = api;
     }
     async triggerOpenOrClose(sensor, newState) {
-        /*
         const event = {
             id: sensor.id,
             typ: newState,
@@ -14,15 +13,13 @@ class EventEngine {
             sent: 0,
             to: ""
         };
-
-        try{
+        try {
             await this.api.sendEvent(event);
             console.log(`[EVENT] Sent ${newState.toUpperCase()} event for sensor ID ${sensor.id}`);
         }
-        catch(err) {
+        catch (err) {
             console.error(`[EVENT] Failed to sent event for sensor ID ${sensor.id}`, err);
         }
-            */
     }
 }
 exports.EventEngine = EventEngine;
