@@ -1,11 +1,12 @@
-import { FakeZlklApi } from "../data/fakeZlklApi";
-import { ZlklSensor } from "../models/zlklTypes";
-
-export class EventEngine {
-    constructor(private api: FakeZlklApi){}
-
-    public async triggerOpenOrClose(sensor: ZlklSensor, newState: "open" | "closed") {
-        
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.EventEngine = void 0;
+class EventEngine {
+    constructor(api) {
+        this.api = api;
+    }
+    async triggerOpenOrClose(sensor, newState) {
+        /*
         const event = {
             id: sensor.id,
             typ: newState,
@@ -21,6 +22,7 @@ export class EventEngine {
         catch(err) {
             console.error(`[EVENT] Failed to sent event for sensor ID ${sensor.id}`, err);
         }
-            
+            */
     }
 }
+exports.EventEngine = EventEngine;

@@ -2,7 +2,6 @@ import mqtt, { MqttClient } from "mqtt";
 import { MqttGlobMessage, MqttTofEventMessage } from "../models/mqttTypes";
 import { handleGlobMessage, handleTofEventMessage } from "../mqtt/mqttHandlers";
 import { SensorStore } from "../store/sensorStore";
-import { ThresholdEngine } from "../engines/thresholdEngine";
 import { EventEngine } from "../engines/eventEngine";
 
 export interface MqttConfig {
@@ -14,7 +13,7 @@ export interface MqttConfig {
 export class MqttService {
   private client: MqttClient;
 
-  constructor(private config: MqttConfig, private store: SensorStore, private thEngine: ThresholdEngine, private evEngine: EventEngine) {
+  constructor(private config: MqttConfig, private store: SensorStore, private evEngine: EventEngine) {
     this.client = mqtt.connect(this.config.url, {
       username: this.config.username,
       password: this.config.password,
@@ -45,7 +44,7 @@ export class MqttService {
       if (topic.startsWith("zlkl/devs/glob/")) {
         const message = json as MqttGlobMessage;
         console.log("Received MQTT Glob message.");
-        handleGlobMessage(message, this.store, this.thEngine, this.evEngine);
+        handleGlobMessage(message, this.store, this.evEngine);
         return;
       }
 
