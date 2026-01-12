@@ -26,25 +26,27 @@ export function handleGlobMessage(
     if (runtime.current_state === globState) continue;
     if (runtime.hysteresis_timer) continue;
 
-    // state different, hysteresis not active
+    // state different, hysteresis not active - we are interested in this sensor - may be some issue
+    // set new states
     runtime.previous_state = runtime.current_state;
     runtime.current_state = globState;
 
-    if (globState === "open") {
+    // below are additinal operations which are needed to do. 
+    if (globState === "open") { // if door open 
       if (!runtime.open_timestamp) {// if there is no record of opening
-        runtime.open_timestamp = Date.now();
-        runtime.open_confirmed = false;
+        runtime.open_timestamp = Date.now(); // add record of opening
+        runtime.open_confirmed = false; // set that this was not notified by email
       }
-    } else {
-      if (runtime.open_confirmed) {
-        runtime.close_timestamp = Date.now();
+    } else { // if door closed
+      if (runtime.open_confirmed) { // and users were notified about previous opening
+        runtime.close_timestamp = Date.now(); // set timestamp about closing
         console.log(
           `[GLOB] ${currSensor.id}: Closing event.`
         );
 
-        eventEngine.triggerOpenOrClose(currSensor, "closed");
+        eventEngine.triggerOpenOrClose(currSensor, "closed"); // send notification about closing
       }
-
+      // reset open runtime variables
       runtime.open_timestamp = null;
       runtime.open_confirmed = false;
     }

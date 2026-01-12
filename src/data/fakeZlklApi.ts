@@ -3,14 +3,15 @@ import { ZlklApiResponse } from "../models/zlklTypes";
 
 export class FakeZlklApi {
     private baseUrl: string = "http://192.168.88.46:12345";
+    private mqttId: string = "zlkl_grot_test_00155d000104";
     async getSensors() : Promise<ZlklApiResponse> {
         return {
             sens: [
                 {
                     id: 1,
-                    adr: "tof_state:FAKE:ADDR:01",
-                    nazev: "Test Gate",
-                    mqtt_id: "zlkl_test_gate",
+                    adr: `${this.mqttId}::door_1`,
+                    nazev: "Lakovna",
+                    mqtt_id: this.mqttId,
                     misto_id: 1,
                     thresholds: {
                         prahy: [
@@ -24,10 +25,10 @@ export class FakeZlklApi {
                 },
                 {
                     id: 2,
-                    adr: "tof_state:FAKE:ADDR:02",
-                    nazev: "Strojovna",
-                    mqtt_id: "zlkl_test_gate2",
-                    misto_id: 1,
+                    adr: `${this.mqttId}::door_2`,
+                    nazev: "Strojovna 1",
+                    mqtt_id: this.mqttId,
+                    misto_id: 2,
                     thresholds: {
                         prahy: [
                             {
@@ -40,9 +41,9 @@ export class FakeZlklApi {
                 },
                 {
                     id: 3,
-                    adr: "tof_state:FAKE:ADDR:03",
-                    nazev: "Lakovna",
-                    mqtt_id: "zlkl_test_gate3",
+                    adr: `${this.mqttId}::door_3`,
+                    nazev: "Strojovna 2",
+                    mqtt_id: this.mqttId,
                     misto_id: 2,
                     thresholds: {
                         prahy: [
@@ -56,10 +57,10 @@ export class FakeZlklApi {
                 },
                 {
                     id: 4,
-                    adr: "tof_state:FAKE:ADDR:04",
+                    adr: `${this.mqttId}::door_4`,
                     nazev: "Stara Lakovna",
-                    mqtt_id: "zlkl_test_gate4",
-                    misto_id: 2,
+                    mqtt_id: this.mqttId,
+                    misto_id: 3,
                     thresholds: {
                         prahy: [
                             {
@@ -76,7 +77,7 @@ export class FakeZlklApi {
                 {
                     id: 1,
                     pth: "Test / Gate",
-                    nazev: "Test Location",
+                    nazev: "Lakovna",
                     map: 0,
                     tof_prah_min: 0.1,
                     tof_maily: "test@example.com",
@@ -84,11 +85,19 @@ export class FakeZlklApi {
                 {
                     id: 2,
                     pth: "Test / Gate",
-                    nazev: "Maksantovka",
+                    nazev: "Strojovna",
                     map: 0,
                     tof_prah_min: 0.2,
                     tof_maily: "test@example.com",
                 },
+                {
+                    id: 3,
+                    pth: "Test / Gate",
+                    nazev: "Stara Lakovna",
+                    map: 0,
+                    tof_prah_min: 0.3,
+                    tof_maily: "test@example.com",
+                }
             ],
         };
     }

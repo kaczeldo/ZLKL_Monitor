@@ -50,7 +50,6 @@ export class PeriodicCheckEngine {
             }else if (rs.current_state === "closed"){
                 // logic for closed
             }
-
         }
     }
 

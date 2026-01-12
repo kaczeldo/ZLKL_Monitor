@@ -7,7 +7,8 @@ import { LocStore } from "./store/locStore";
 import { PeriodicCheckEngine } from "./engines/PreiodicCheckEngine";
 
 async function start() {
-  // initialize data  - fake for now
+  // initialize data  - fake knihovna ze ZLKL api. 
+  // nacteme senzory a lokace.
   const api = new FakeZlklApi();
   console.log("fetching sensors...");
   const data = await api.getSensors();
